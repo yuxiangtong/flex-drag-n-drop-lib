@@ -271,12 +271,10 @@ package dNdLib.managers
 		
 		private function onDragOver (evt:DragEvent):void
 		{
-			
 		}
 		
 		private function onDragStart (evt:DragEvent):void
 		{
-			
 		}
 		
 		///////////////////////////////////////////////////////////////
@@ -296,8 +294,8 @@ package dNdLib.managers
 				target.removeEventListener(DragEvent.DRAG_DROP, onDragDrop);
 				target.removeEventListener(DragEvent.DRAG_ENTER, onDragEnter);
 				target.removeEventListener(DragEvent.DRAG_EXIT, onDragExit);
-				//target.removeEventListener(DragEvent.DRAG_OVER, onDragOver);
-				//target.removeEventListener(DragEvent.DRAG_START, onDragStart);
+				target.removeEventListener(DragEvent.DRAG_OVER, onDragOver);
+				target.removeEventListener(DragEvent.DRAG_START, onDragStart);
 			}
 			
 			else
@@ -314,11 +312,11 @@ package dNdLib.managers
 				if (!target.hasEventListener(DragEvent.DRAG_EXIT))
 					target.addEventListener(DragEvent.DRAG_EXIT, onDragExit);
 				
-				/*if (!target.hasEventListener(DragEvent.DRAG_OVER))
+				if (!target.hasEventListener(DragEvent.DRAG_OVER))
 					target.addEventListener(DragEvent.DRAG_OVER, onDragOver);
 				
 				if (!target.hasEventListener(DragEvent.DRAG_START))
-					target.addEventListener(DragEvent.DRAG_START, onDragStart);*/
+					target.addEventListener(DragEvent.DRAG_START, onDragStart);
 			}
 		}
 		
