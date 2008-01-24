@@ -15,6 +15,19 @@ package dNdLib.containers
 			DnDManager.getInstance().registerContainer(this);
 		}
 		
+		[Bindable("layoutChanged")]
+		public function get layout ():String
+		{
+			return direction;
+		}
+		
+		public function set layout (value:String):void
+		{
+			direction = value;
+			
+			dispatchEvent(new Event("layoutChanged"));
+		}
+		
 		private var _dragOut:Boolean = true;
 		
 		[Bindable("allowDragOutChanged")]
