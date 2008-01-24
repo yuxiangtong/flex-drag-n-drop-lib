@@ -119,12 +119,44 @@ package dNdLib.managers
 				return calculateVerticalIndex();
 			
 			else
-				return 0;//later on we can calc for custom layouts --- wayyyyy into the future
+				return -1;//later on we can calc for custom layouts --- wayyyyy into the future
 		}
 			
 		private function calculateHorizontalIndex ():int
 		{
-			return 0;
+			var pt:Point = new Point();
+			pt.x = UIComponent(_destinationContainer).stage.mouseX;
+			pt.y = UIComponent(_destinationContainer).stage.mouseY;
+			pt = UIComponent(_destinationContainer).globalToContent(pt);
+			
+			var prevChild:DisplayObject;
+			var child:DisplayObject;
+			var i:int;
+			for (i; i < _destinationContainer.numChildren; i++)
+			{
+				//if the child hits the pt, then no need for further calculation
+				child = _destinationContainer.getChildAt(i);
+				if (child.x <= pt.x && pt.x <= child.x + child.width)
+					return i;
+					
+				//for first child, are we inside the padding at the top?
+				if (i == 0)
+				{
+					if (pt.x < child.x)
+						return 0;
+				}
+				
+				//does the pt reside betw. two children?
+				if (prevChild)
+				{
+					if (prevChild.x + prevChild.width < pt.x && pt.x < child.x)
+						return i;
+				}
+				
+				prevChild = child;					
+			}
+			
+			return -1; //tells us that the destination container should use addChild instead of addChildAt
 		}
 		
 		private function calculateVerticalIndex ():int
