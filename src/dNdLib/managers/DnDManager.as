@@ -1,12 +1,9 @@
 package dNdLib.managers
 {
-	import com.jwopitz.utils.BitmapUtil;
-	
 	import dNdLib.containers.IDnDContainer;
 	import dNdLib.events.DnDEvent;
 	
 	import flash.display.DisplayObject;
-	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.MouseEvent;
@@ -18,8 +15,14 @@ package dNdLib.managers
 	import mx.events.DragEvent;
 	import mx.managers.DragManager;
 	
+	/**
+	 * Singleton class that conducts DnD operations.
+	 */
 	public class DnDManager extends EventDispatcher implements IDnDManager
 	{
+		/**
+		 * @inheritDoc
+		 */
 		public function get isDragging ():Boolean
 		{
 			return DragManager.isDragging;
@@ -29,8 +32,14 @@ package dNdLib.managers
 		//	REGISTER
 		///////////////////////////////////////////////////////////////
 		
+		/**
+		 * @private
+		 */
 		private var _dNdContainers:ArrayCollection = new ArrayCollection();
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function registerContainer (target:IDnDContainer):Boolean
 		{
 			//determine if target is registered or not
@@ -52,19 +61,54 @@ package dNdLib.managers
 		//	DO DRAG
 		///////////////////////////////////////////////////////////////
 		
+		/**
+		 * @private
+		 */
 		private var _dragInitiator:UIComponent;
 		
+		/**
+		 * @private
+		 */
 		private var _originalDnDContainer:IDnDContainer;
+		
+		/**
+		 * @private
+		 */
 		private var _originalIndex:int;
 	
+		/**
+		 * @private
+		 */
 		private var _destinationContainer:IDnDContainer;
+		
+		/**
+		 * @private
+		 */
 		private var _destinationIndex:int;
 		
+		/**
+		 * @private
+		 */
 		private var _dropTargetImage:UIComponent;
 		
-		public var useDropTargetImage:Boolean = true;
+		/**
+		 * Flag indicating if a target index indicator is used during the DnD operation.
+		 * This feature is currently not in use.
+		 */
+		public var useDropTargetImage:Boolean = false;
+		
+		//public var dropTargetStyle:String = "none"; //"simple", "complex"
+		
+		/**
+		 * Flag indicating whether to use a simple drag proxy image or a more complex rendering.
+		 */
 		public var useSimpleDragProxy:Boolean = true;
 		
+		/**
+		 * Initiates a DnD operation.
+		 * 
+		 * @param evt The mouse event triggered from the drag initiator.
+		 */
 		public function doDrag (evt:MouseEvent):void
 		{
 			if (isDragging)
@@ -109,6 +153,12 @@ package dNdLib.managers
 		//	MISC METHODS
 		///////////////////////////////////////////////////////////////
 		
+		/**
+		 * Depending on the destination container's layout, this will calculated the intended index to add the DnD content.
+		 * Future features will accommodate custom layouts.
+		 * 
+		 * @return int The destination index for the DnD content.
+		 */
 		//can be overridden for use with a DnDContainer that has a custom layout i.e. circular layout
 		protected function calculateDestinationIndex ():int
 		{
@@ -121,7 +171,10 @@ package dNdLib.managers
 			else
 				return -1;//later on we can calc for custom layouts --- wayyyyy into the future
 		}
-			
+		
+		/**
+		 * @private
+		 */
 		private function calculateHorizontalIndex ():int
 		{
 			var pt:Point = new Point();
@@ -153,12 +206,15 @@ package dNdLib.managers
 						return i;
 				}
 				
-				prevChild = child;					
+				prevChild = child;			
 			}
 			
 			return -1; //tells us that the destination container should use addChild instead of addChildAt
 		}
 		
+		/**
+		 * @private
+		 */
 		private function calculateVerticalIndex ():int
 		{
 			var pt:Point = new Point();
@@ -196,6 +252,9 @@ package dNdLib.managers
 			return -1; //tells us that the destination container should use addChild instead of addChildAt
 		}
 		
+		/**
+		 * @private
+		 */
 		private function canAcceptDrop (destination:IDnDContainer):Boolean
 		{
 			if (destination.maximumNumChildren == 0)
@@ -210,10 +269,22 @@ package dNdLib.managers
 			return false;
 		}
 		
+		/**
+		 * @private
+		 */
+		private function updateDropTargetPosition ():void
+		{
+			//are we doing psuedo-positioning or actually adding a drop target to the destination container?
+			
+		}
+		
 		///////////////////////////////////////////////////////////////
 		//	REDISPATCH DnD EVENT
 		///////////////////////////////////////////////////////////////
 		
+		/**
+		 * @private
+		 */
 		private function dispatchDnDEvent (evt:DnDEvent):Boolean
 		{
 			evt.dragInitiator = _dragInitiator;
@@ -229,11 +300,17 @@ package dNdLib.managers
 		//	DRAG EVENT HANDLERS
 		///////////////////////////////////////////////////////////////
 		
+		/**
+		 * @private
+		 */
 		private function onDragComplete (evt:DragEvent):void
 		{
 			dispatchDnDEvent(new DnDEvent(DnDEvent.COMPLETE_DnD));
 		}
 		
+		/**
+		 * @private
+		 */
 		private function onDragDrop (evt:DragEvent):void
 		{
 			_destinationContainer = IDnDContainer(evt.target);
@@ -251,28 +328,69 @@ package dNdLib.managers
 			dispatchDnDEvent(new DnDEvent(DnDEvent.DROP_DnD));
 		}
 		
+		/**
+		 * @private
+		 */
 		private function onDragEnter (evt:DragEvent):void
 		{
 			_destinationContainer = IDnDContainer(evt.target);
 			
-			if (!_destinationContainer.allowSelfDrop && _destinationContainer == _originalDnDContainer)
-				return;
+			if (_destinationContainer.allowDropIn)
+			{
+				//dropping in same container? can we?
+				if (_destinationContainer == _originalDnDContainer)
+				{
+					if (_destinationContainer.allowSelfDrop)
+					{
+						DragManager.acceptDragDrop(_destinationContainer);
+						dispatchDnDEvent(new DnDEvent(DnDEvent.ENTER_DnD));
+					}
+					
+					return;
+				}
 				
-			if (_destinationContainer.allowDropIn)// && canAcceptDrop(_destinationContainer))
-				DragManager.acceptDragDrop(_destinationContainer);
+				//do we have limitations set via related containers?
+				else if (_destinationContainer.relatedContainers.length > 0)
+				{
+					var item:String;
+					for each (item in _destinationContainer.relatedContainers)
+					{
+						if (_originalDnDContainer.id == item)
+						{
+							DragManager.acceptDragDrop(_destinationContainer);
+							dispatchDnDEvent(new DnDEvent(DnDEvent.ENTER_DnD));
+							
+							return;
+						}
+					}
+				}
 				
-			dispatchDnDEvent(new DnDEvent(DnDEvent.ENTER_DnD));
+				else
+				{	
+					DragManager.acceptDragDrop(_destinationContainer);
+					dispatchDnDEvent(new DnDEvent(DnDEvent.ENTER_DnD));
+				}
+			}
 		}
 		
+		/**
+		 * @private
+		 */
 		private function onDragExit (evt:DragEvent):void
 		{
 			dispatchDnDEvent(new DnDEvent(DnDEvent.EXIT_DnD));
 		}
 		
+		/**
+		 * @private
+		 */
 		private function onDragOver (evt:DragEvent):void
 		{
 		}
 		
+		/**
+		 * @private
+		 */
 		private function onDragStart (evt:DragEvent):void
 		{
 		}
@@ -281,11 +399,17 @@ package dNdLib.managers
 		//	DRAG EVENT REGISTRATION
 		///////////////////////////////////////////////////////////////
 		
+		/**
+		 * @private
+		 */
 		private function updateDnDContainerEventHandlers (evt:Event):void
 		{
 			registerDnDContainerForDragEvents(IDnDContainer(evt.target));
 		}
 		
+		/**
+		 * @private
+		 */
 		private function registerDnDContainerForDragEvents (target:IDnDContainer):void
 		{
 			if (!target.allowDropIn)
@@ -324,8 +448,16 @@ package dNdLib.managers
 		//	SINGLETON
 		///////////////////////////////////////////////////////////////
 		
+		/**
+		 * @private
+		 */
 		static private var _instance:DnDManager;
 		
+		/**
+		 * DnDManager is a Singleton implementor.
+		 * 
+		 * @returns DnDManager The singlular instance.
+		 */
 		static public function getInstance ():DnDManager
 		{
 			if (!_instance)
@@ -334,6 +466,9 @@ package dNdLib.managers
 			return _instance;
 		}
 		
+		/**
+		 * @private
+		 */
 		function DnDManager ()
 		{
 			super();
