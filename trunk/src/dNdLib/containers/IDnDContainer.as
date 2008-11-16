@@ -90,7 +90,9 @@ package dNdLib.containers
 		////////////////////////////////////////////////////////////////////
 		
 		/**
-		 * @private
+		 * A list of IDnDContainer ids.  If this array is empty, the the IDnDContainer will allow drag operations from any other origin container.
+		 * If there are ids present in this list, this IDnDContainer will only accept drag operations from those IDnDContainers whose ids are present.
+		 * This property does not interfere with the other drag operation restriction properties and is the last to be evaluated.
 		 */
 		function get relatedContainers ():Array;
 		

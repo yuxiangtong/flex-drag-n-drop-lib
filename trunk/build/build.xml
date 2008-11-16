@@ -18,7 +18,7 @@
 			<arg line="-source-path ${src.dir}"/>
 			<arg line="-namespace ${manifest.uri} ${manifest.xml}"/>
 			<arg line="-include-namespaces ${manifest.uri}"/>
-			<arg line="-include-classes dNdLib.containers.IDnDContainer dNdLib.events.DnDEvent dNdLib.managers.DnDManager dNdLib.managers.IDnDManager"/>
+			<arg line="-include-classes dNdLib.containers.IDnDContainer dNdLib.events.DnDEvent dNdLib.managers.IDnDManager"/>
 		</exec>
 	</target>
 	

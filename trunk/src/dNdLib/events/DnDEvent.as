@@ -9,30 +9,43 @@ package dNdLib.events
 	 */
 	public class DnDEvent extends Event
 	{
+		//////////////////////////////////////////////////////
+		// CONST
+		//////////////////////////////////////////////////////
+		
 		/**
 		 * Event type triggered when a DnD operation starts.
 		 */
-		static public const START_DnD:String = "startDragNDrop";
+		static public const START_DnD:String = "dNdStart";
 		
 		/**
 		 * Event type triggered when a DnD operation enters the space of a IDnDContainer.
 		 */
-		static public const ENTER_DnD:String = "enterDragNDrop";
+		static public const ENTER_DnD:String = "dNdEnter";
 		
 		/**
 		 * Event type triggered when a DnD operation exits the space of a IDnDContainer.
 		 */
-		static public const EXIT_DnD:String = "exitDragNDrop";
+		static public const EXIT_DnD:String = "dNdExit";
 		
 		/**
 		 * Event type triggered when a DnD operation's content is dropped onto a target.
 		 */
-		static public const DROP_DnD:String = "dropDragNDrop";
+		static public const DROP_DnD:String = "dNdDrop";
+		
+		/**
+		 * Event type triggered when a DnD operation's content is dropped onto a target.
+		 */
+		static public const OVER_DnD:String = "dNdOver";
 		
 		/**
 		 * Event type triggered when a DnD operation has completed.
 		 */
-		static public const COMPLETE_DnD:String = "completeDragNDrop";
+		static public const COMPLETE_DnD:String = "dNdComplete";
+		
+		//////////////////////////////////////////////////////
+		// VARS
+		//////////////////////////////////////////////////////
 		
 		/**
 		 * The IDnDContainer who initiated the DnD operation.
@@ -60,6 +73,10 @@ package dNdLib.events
 		 */
 		public var destinationContainer:IUIComponent;
 		
+		//////////////////////////////////////////////////////
+		// CONSTRUCTOR
+		//////////////////////////////////////////////////////
+		
 		/**
 		 * @inheritDoc
 		 */
@@ -67,6 +84,10 @@ package dNdLib.events
 		{
 			super(type, bubbles, cancelable);
 		}
+		
+		//////////////////////////////////////////////////////
+		// OVERRIDES
+		//////////////////////////////////////////////////////
 		
 		/**
 		 * @inheritDoc
