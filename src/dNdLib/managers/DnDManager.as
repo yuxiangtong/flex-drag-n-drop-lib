@@ -11,9 +11,17 @@ package dNdLib.managers
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.DragSource;
+	import mx.core.IUIComponent;
 	import mx.core.UIComponent;
 	import mx.events.DragEvent;
 	import mx.managers.DragManager;
+	
+	[Event(name="dNdStart", type="dNdLib.events.DnDEvent")]
+	[Event(name="dNdComplete", type="dNdLib.events.DnDEvent")]
+	[Event(name="dNdDrop", type="dNdLib.events.DnDEvent")]
+	[Event(name="dNdEnter", type="dNdLib.events.DnDEvent")]
+	[Event(name="dNdExit", type="dNdLib.events.DnDEvent")]
+	[Event(name="dNdOver", type="dNdLib.events.DnDEvent")]
 	
 	/**
 	 * Singleton class that conducts DnD operations.
@@ -115,38 +123,41 @@ package dNdLib.managers
 				return;
 			
 			//get some info about the DnD
-			_dragInitiator = UIComponent(evt.target);
-			_originalDnDContainer = IDnDContainer(_dragInitiator.parent);
-			_originalIndex = _originalDnDContainer.getChildIndex(_dragInitiator);
-			_destinationContainer = IDnDContainer(_dragInitiator.parent);
-			
-			//check to see if we are allowing a drag out
-			if (!_originalDnDContainer.allowDragOut)
-				return;
-			
-			var dragSource:DragSource = new DragSource();
-			var dragProxy:UIComponent;
-			
-			/*if (!useSimpleDragProxy)
+			if (evt.target is UIComponent)
 			{
-				var s:Sprite = BitmapUtil.render(_dragInitiator);
+				_dragInitiator = UIComponent(evt.target);
+				_originalDnDContainer = IDnDContainer(_dragInitiator.parent);
+				_originalIndex = _originalDnDContainer.getChildIndex(_dragInitiator);
+				_destinationContainer = IDnDContainer(_dragInitiator.parent);
 				
-				dragProxy = new UIComponent();
-				dragProxy.addChild(s);
-			}*/
-			
-			DragManager.doDrag(_dragInitiator, dragSource, evt);
-			
-			/*if (useDropTargetImage)
-			{
-				_dropTargetImage = BitmapUtil.renderOutline(_dragInitiator);
-				_dropTargetImage.id = "dropTargetImage";
+				//check to see if we are allowing a drag out
+				if (!_originalDnDContainer.allowDragOut)
+					return;
 				
-				_originalDnDContainer.removeChild(_dragInitiator);
-				_originalDnDContainer.addChildAt(_dropTargetImage, _originalIndex);
-			}*/
-			
-			dispatchDnDEvent(new DnDEvent(DnDEvent.START_DnD));
+				var dragSource:DragSource = new DragSource();
+				var dragProxy:UIComponent;
+				
+				/*if (!useSimpleDragProxy)
+				{
+					var s:Sprite = BitmapUtil.render(_dragInitiator);
+					
+					dragProxy = new UIComponent();
+					dragProxy.addChild(s);
+				}*/
+				
+				DragManager.doDrag(_dragInitiator, dragSource, evt);
+				
+				/*if (useDropTargetImage)
+				{
+					_dropTargetImage = BitmapUtil.renderOutline(_dragInitiator);
+					_dropTargetImage.id = "dropTargetImage";
+					
+					_originalDnDContainer.removeChild(_dragInitiator);
+					_originalDnDContainer.addChildAt(_dropTargetImage, _originalIndex);
+				}*/
+				
+				dispatchDnDEvent(new DnDEvent(DnDEvent.START_DnD));
+			}
 		}
 		
 		///////////////////////////////////////////////////////////////
@@ -386,13 +397,7 @@ package dNdLib.managers
 		 */
 		private function onDragOver (evt:DragEvent):void
 		{
-		}
-		
-		/**
-		 * @private
-		 */
-		private function onDragStart (evt:DragEvent):void
-		{
+			dispatchDnDEvent(new DnDEvent(DnDEvent.OVER_DnD));
 		}
 		
 		///////////////////////////////////////////////////////////////
@@ -419,7 +424,6 @@ package dNdLib.managers
 				target.removeEventListener(DragEvent.DRAG_ENTER, onDragEnter);
 				target.removeEventListener(DragEvent.DRAG_EXIT, onDragExit);
 				target.removeEventListener(DragEvent.DRAG_OVER, onDragOver);
-				target.removeEventListener(DragEvent.DRAG_START, onDragStart);
 			}
 			
 			else
@@ -438,9 +442,6 @@ package dNdLib.managers
 				
 				if (!target.hasEventListener(DragEvent.DRAG_OVER))
 					target.addEventListener(DragEvent.DRAG_OVER, onDragOver);
-				
-				if (!target.hasEventListener(DragEvent.DRAG_START))
-					target.addEventListener(DragEvent.DRAG_START, onDragStart);
 			}
 		}
 		
@@ -469,9 +470,18 @@ package dNdLib.managers
 		/**
 		 * @private
 		 */
-		function DnDManager ()
+		public function DnDManager ()
 		{
 			super();
+			
+			if (_instance)
+			{
+				throw new Error("DnDManager is a singleton class.  Only one instance can be instatiated at a time");
+				return;
+			}
+			
+			else
+				DnDManager._instance = this;
 		}
 	}
 }

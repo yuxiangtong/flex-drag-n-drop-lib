@@ -6,4 +6,9 @@
 		class="dNdLib.containers.DnDContainer"
 		/>
 	
+	<component 
+		id="DnDManager" 
+		class="dNdLib.managers.DnDManager"
+		/>
+	
 </componentPackage>
